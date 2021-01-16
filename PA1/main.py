@@ -29,18 +29,27 @@ def split_dataset(dataset,k):
     test = shuffled_M[(cut_train+cut_val):] # 1 testing set
     return train, val, test
 
-# Check images for top n PCs
-def PC_plot(eigen_vectors,num):
+# Check images for top 4 PCs
+def PC4_plot(eigen_vectors):
     imgs = []
-    plt.figure()
-    f, ax = plt.subplots(num,1)
-    for n in range(num):
+    for n in range(4):
         vh = eigen_vectors[n]
         vh_img = np.reshape(vh,(200,300))
         img = Image.fromarray(vh_img)
         imgs.append(img)
-        ax[n].imshow(imgs[n])
-    plt.show()
+    plt.figure()
+    fig, ax = plt.subplots(2,2)
+    fig.suptitle('Figure2: Images of top 4 principal components')
+    ax[0, 0].imshow(imgs[0])
+    ax[0, 0].set_title('Principal Component 0')
+    ax[0, 1].imshow(imgs[1])
+    ax[0, 1].set_title('Principal Component 1')
+    ax[1, 0].imshow(imgs[2])
+    ax[1, 0].set_title('Principal Component 2')
+    ax[1, 1].imshow(imgs[3])
+    ax[1, 1].set_title('Principal Component 3')
+    # plt.show()
+    plt.savefig('./figures/Q5b_top4PCs.png')
 
 # Generate y vectors (class=0/1) for train/val/test set
 def generate_y(dataM,dataC):
@@ -86,8 +95,9 @@ test1_y = generate_y(testM,testC)
 num_PC = 10
 projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors = PCA(train1,num_PC) # PCA performed only on the training set
 
-# Check images for top n PCs
-# PC_plot(eigen_vectors,num_PC)
+# Check images for top 4 PCs
+PC4_plot(eigen_vectors)
+
 
 # Check projections - should be zero mean and unit std
 # Answer: this is a good idea because normalization help speed up the gradient descent etc.
@@ -106,28 +116,51 @@ test1_x = apply_PCA(test1,mean_image,top_eigen_vectors,top_sqrt_eigen_values)
 
 # initial weight vector
 w = theta(train1_x)
-# initial cost
-cost = cost_function(train1_x,train1_y,w)
-cost_val_list = []
-cost_train_list = [cost]
 # define learning rate and total number of epochs
-lr = 6
-M = 300
+lr = 5
+M = 600
+# lists that record cost
+cost_train_list = []
+cost_val_list = []
+cost_test_list = []
+# lists that record accuracy
+acc_train_list = []
+acc_val_list = []
+acc_test_list = []
 
+# loop M epochs
 for epoch in range(M):
-    #
+    # tran the model with training set (train_x and train_y)
     grad, w = stepwise_gradient(train1_x,train1_y,w,lr)
+    # compute and record cost and accuracy
+    # training set
     cost_train = cost_function(train1_x, train1_y, w)
-    cost_val = cost_function(val1_x,val1_y,w)
     cost_train_list.append(cost_train)
+    acc_train = predict_acc(train1_x, train1_y, w)
+    acc_train_list.append(acc_train)
+    # acc_train =
+    # validation set
+    cost_val = cost_function(val1_x,val1_y,w) # test performance on val every epoch
     cost_val_list.append(cost_val)
-print(w)
-# plt.plot(cost_val_list)
+    acc_val = predict_acc(val1_x, val1_y, w)
+    acc_val_list.append(acc_val)
+    # testing set
+    cost_test = cost_function(test1_x, test1_y, w)
+    cost_test_list.append(cost_test)
+    acc_test = predict_acc(test1_x, test1_y, w)
+    acc_test_list.append(acc_test)
+# save the best model
+val, idx = min((val, idx) for (idx, val) in enumerate(cost_val_list))
+
+print(cost_test_list[idx],acc_test_list[idx])
+
+# Plot: Cost against Epochs
+plt.figure()
 plt.plot(cost_train_list, 'b', label='training error')
 plt.plot(cost_val_list, 'r', label='validation error')
 plt.xlabel('M epochs')
 plt.ylabel('Cost')
-plt.title('Cost against epochs')
+plt.title('Training and validation loss in one run')
 plt.legend()
-plt.show()
-
+# plt.show()
+plt.savefig('./figures/Q5b_curves.png')
