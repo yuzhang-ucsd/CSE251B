@@ -111,7 +111,7 @@ cost = cost_function(train1_x,train1_y,w)
 cost_val_list = []
 cost_train_list = [cost]
 # define learning rate and total number of epochs
-lr = 3
+lr = 6
 M = 300
 
 for epoch in range(M):
@@ -127,7 +127,7 @@ plt.plot(cost_train_list, 'b', label='training error')
 plt.plot(cost_val_list, 'r', label='validation error')
 plt.xlabel('M epochs')
 plt.ylabel('Cost')
-plt.title('Error against epochs')
+plt.title('Cost against epochs')
 plt.legend()
 plt.show()
 
