@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import os, random
 import numpy as np
+from PIL import Image
 
 # Convert 2-D image(200x300) to 1-D vector
 def flatten_img(imgset):

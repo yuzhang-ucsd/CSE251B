@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*
 import os, random
-from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from PCA import PCA
@@ -42,6 +41,7 @@ def main():
 
     # Check projections - should be zero mean and unit std
     # Answer: this is a good idea because normalization help speed up the gradient descent etc.
+    # (Normailzation is necessary for gradient descent) Or the learnt answer will be biased
     # print(np.average(projected,axis=0)) # this is close to zero
     # print(np.std(projected,axis=0)) # !=1 ???
 
@@ -91,6 +91,8 @@ def main():
         acc_test = predict_acc(test1_x, test1_y, w)
         acc_test_list.append(acc_test)
     # save the best model
+    print(cost_val_list)
+    ad
     val, idx = min((val, idx) for (idx, val) in enumerate(cost_val_list))
 
     print(cost_test_list[idx],acc_test_list[idx])
