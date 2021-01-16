@@ -40,4 +40,3 @@ def predict_acc(X,y,theta):
     accuracy = sum(correct)/len(correct)*100 # accuracy in %
     return accuracy
 
-
