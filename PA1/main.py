@@ -51,8 +51,7 @@ def generate_y(dataM,dataC):
     return data_y
 
 # Apply PCs computed on the training set to val/testing set to extract small number of representative features
-def apply_PCA(input_dataset,top_eigen_vectors,top_sqrt_eigen_values):
-    mean_image = np.average(input_dataset, axis = 0)
+def apply_PCA(input_dataset,mean_image,top_eigen_vectors,top_sqrt_eigen_values):
     msd = input_dataset - mean_image # M x d
     projected = np.matmul(msd, top_eigen_vectors)/top_sqrt_eigen_values
     PACed_x = np.insert(projected, 0, 1, axis=1)
@@ -84,7 +83,7 @@ test1_y = generate_y(testM,testC)
 
 # Perform PCA on the flattened training set
 # Try using different numbers of components
-num_PC = 3
+num_PC = 10
 projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors = PCA(train1,num_PC) # PCA performed only on the training set
 
 # Check images for top n PCs
@@ -98,8 +97,8 @@ projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors =
 
 # generate input x from the datasets
 train1_x = np.insert(projected, 0, 1, axis=1) # adding x0 = 1 (a ones column)
-val1_x = apply_PCA(val1,top_eigen_vectors,top_sqrt_eigen_values)
-test1_x = apply_PCA(test1,top_eigen_vectors,top_sqrt_eigen_values)
+val1_x = apply_PCA(val1,mean_image,top_eigen_vectors,top_sqrt_eigen_values)
+test1_x = apply_PCA(test1,mean_image,top_eigen_vectors,top_sqrt_eigen_values)
 
 # print(train1_x.shape)
 # print(train1_y.shape)
@@ -107,20 +106,28 @@ test1_x = apply_PCA(test1,top_eigen_vectors,top_sqrt_eigen_values)
 
 # initial weight vector
 w = theta(train1_x)
-print(w)
 # initial cost
 cost = cost_function(train1_x,train1_y,w)
-cost_list = [cost]
+cost_val_list = []
+cost_train_list = [cost]
 # define learning rate and total number of epochs
-lr = 0.1
+lr = 3
 M = 300
 
 for epoch in range(M):
     #
     grad, w = stepwise_gradient(train1_x,train1_y,w,lr)
-    cost_updated = cost_function(val1_x,val1_y,w)
-    cost_list.append(cost_updated)
-    epoch = epoch + 1
+    cost_train = cost_function(train1_x, train1_y, w)
+    cost_val = cost_function(val1_x,val1_y,w)
+    cost_train_list.append(cost_train)
+    cost_val_list.append(cost_val)
 print(w)
-plt.plot(cost_list)
+# plt.plot(cost_val_list)
+plt.plot(cost_train_list, 'b', label='training error')
+plt.plot(cost_val_list, 'r', label='validation error')
+plt.xlabel('M epochs')
+plt.ylabel('Cost')
+plt.title('Error against epochs')
+plt.legend()
 plt.show()
+
