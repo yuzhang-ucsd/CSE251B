@@ -42,6 +42,24 @@ def PC_plot(eigen_vectors,num):
         ax[n].imshow(imgs[n])
     plt.show()
 
+# Generate y vectors (class=0/1) for train/val/test set
+def generate_y(dataM,dataC):
+    dataM_y = np.ones(len(dataM))
+    dataC_y = np.zeros(len(dataC))
+    data_y = np.concatenate((dataM_y, dataC_y), axis=0)
+    data_y = np.array([[i] for i in data_y])  # classes - input y to Logistic regression model
+    return data_y
+
+# Apply PCs computed on the training set to val/testing set to extract small number of representative features
+def apply_PCA(input_dataset,top_eigen_vectors,top_sqrt_eigen_values):
+    mean_image = np.average(input_dataset, axis = 0)
+    msd = input_dataset - mean_image # M x d
+    projected = np.matmul(msd, top_eigen_vectors)/top_sqrt_eigen_values
+    PACed_x = np.insert(projected, 0, 1, axis=1)
+    return PACed_x
+
+
+
 # Load data from ./resized/ folder
 images, cnt = load_data(data_dir="./resized/")
 Minivan = images.get('Minivan')
@@ -53,24 +71,23 @@ convertible = flatten_img(Convertible)
 
 # select train/val/test from class1=Minivan(M)
 trainM, valM, testM = split_dataset(minivan,10)
-trainM_y = np.ones(len(trainM))
 # select train/val/test from class2=Convertible(C)
 trainC, valC, testC = split_dataset(convertible,10)
-trainC_y = np.zeros(len(trainC))
 # combine the datasets
 train1 = np.concatenate((trainM, trainC),axis=0) # images
-train1_y = np.concatenate((trainM_y, trainC_y), axis=0)
-train1_y = np.array([[i] for i in train1_y]) # classes - input y to Logistic regression model
 val1 = np.concatenate((valM, valC),axis=0)
 test1 = np.concatenate((testM, testC),axis=0)
+# generate input y from the datasets
+train1_y = generate_y(trainM,trainC)
+val1_y = generate_y(valM,valC)
+test1_y = generate_y(testM,testC)
 
-
-# Perform PCA on the flattened dataset
+# Perform PCA on the flattened training set
 # Try using different numbers of components
 num_PC = 3
-projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors = PCA(train1,num_PC)
+projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors = PCA(train1,num_PC) # PCA performed only on the training set
 
-# Optional: Check images for top n PCs
+# Check images for top n PCs
 # PC_plot(eigen_vectors,num_PC)
 
 # Check projections - should be zero mean and unit std
@@ -79,17 +96,31 @@ projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors =
 # print(np.std(projected,axis=0)) # !=1 ???
 
 
-# input x to the regression model
+# generate input x from the datasets
 train1_x = np.insert(projected, 0, 1, axis=1) # adding x0 = 1 (a ones column)
-w = theta(train1_x) # initial weight vector
-print(train1_x.shape)
-print(train1_y.shape)
-print(w.shape)
+val1_x = apply_PCA(val1,top_eigen_vectors,top_sqrt_eigen_values)
+test1_x = apply_PCA(test1,top_eigen_vectors,top_sqrt_eigen_values)
+
+# print(train1_x.shape)
+# print(train1_y.shape)
+# print(w.shape)
+
+# initial weight vector
+w = theta(train1_x)
+print(w)
+# initial cost
 cost = cost_function(train1_x,train1_y,w)
-print(cost)
-grad = gradient_one_round(train1_x,train1_y,w)
-print(grad)
+cost_list = [cost]
+# define learning rate and total number of epochs
+lr = 0.1
+M = 300
 
-
-
-
+for epoch in range(M):
+    #
+    grad, w = stepwise_gradient(train1_x,train1_y,w,lr)
+    cost_updated = cost_function(val1_x,val1_y,w)
+    cost_list.append(cost_updated)
+    epoch = epoch + 1
+print(w)
+plt.plot(cost_list)
+plt.show()

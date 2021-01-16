@@ -18,14 +18,17 @@ def cost_function(X,y,theta):
     cost = np.sum(cost_i) / (len(X))
     return cost
 
-# def gradient_descent(theta,X,y):
-def gradient_one_round(X,y,theta):
+#
+def stepwise_gradient(X,y,theta,lr):
     theta = np.asmatrix(theta)
     X = np.asmatrix(X)
     y = np.asmatrix(y)
     error = sigmoid(X * theta.T) - y
     grad = X.T * error / len(X)
-    return grad
+    grad = np.squeeze(np.asarray(grad))
+    theta_updated = theta - lr*grad
+    theta_updated = np.squeeze(np.asarray(theta_updated))
+    return grad, theta_updated
 
 
 
