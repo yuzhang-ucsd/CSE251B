@@ -24,18 +24,27 @@ def split_dataset(dataset,k):
     test = shuffled_M[(cut_train+cut_val):] # 1 testing set
     return train, val, test
 
-# Check images for top n PCs
-def PC_plot(eigen_vectors,num):
+# Check images for top 4 PCs
+def PC4_plot(eigen_vectors):
     imgs = []
-    plt.figure()
-    f, ax = plt.subplots(num,1)
-    for n in range(num):
+    for n in range(4):
         vh = eigen_vectors[n]
         vh_img = np.reshape(vh,(200,300))
         img = Image.fromarray(vh_img)
         imgs.append(img)
-        ax[n].imshow(imgs[n])
-    plt.show()
+    plt.figure()
+    fig, ax = plt.subplots(2,2)
+    fig.suptitle('Figure2: Images of top 4 principal components')
+    ax[0, 0].imshow(imgs[0])
+    ax[0, 0].set_title('Principal Component 0')
+    ax[0, 1].imshow(imgs[1])
+    ax[0, 1].set_title('Principal Component 1')
+    ax[1, 0].imshow(imgs[2])
+    ax[1, 0].set_title('Principal Component 2')
+    ax[1, 1].imshow(imgs[3])
+    ax[1, 1].set_title('Principal Component 3')
+    # plt.show()
+    plt.savefig('./figures/Q5b_top4PCs.png')
 
 # Generate y vectors (class=0/1) for train/val/test set
 def generate_y(dataM,dataC):
