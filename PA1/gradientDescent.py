@@ -41,4 +41,3 @@ def predict_acc(X,y,theta):
     return accuracy
 
 
-
