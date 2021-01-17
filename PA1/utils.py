@@ -10,11 +10,35 @@ def flatten_img(imgset):
         new_set.append(imgset[i].flatten())
     return np.array(new_set)
 
-# Split the dataset into (k-2) sets for training, 1 set for validation and 1 set for testing
-def split_dataset(dataset,k):
+# Split the dataset into 8/10 portion for training, 1 set for validation and 1 set for testing
+# Repeat k times and then average
+def split_dataset_k_fold(dataset, k):
     size = len(dataset)
-    cut_train = int((k-2)/k * size) # training cutoff
-    cut_val = int(1/k * size) # validation cutoff
+    cut_train = int((10-2)/10 * size) # training cutoff
+    cut_val = int(1/10 * size) # validation cutoff
+    train = []
+    val = []
+    test = []
+    for i in range(k):
+        # shuffle the dataset
+        idx = np.arange(0,size)
+        random.shuffle(idx)
+        shuffled_M = dataset[idx]
+        # select subsets of data
+        train_tmp = shuffled_M[:cut_train] # (k-2) training set
+        val_tmp = shuffled_M[cut_train:(cut_train+cut_val)] # 1 validation set
+        test_tmp = shuffled_M[(cut_train+cut_val):] # 1 testing set
+        train.append(train_tmp)
+        val.append(val_tmp)
+        test.append(test_tmp)
+    return train, val, test
+
+
+# Split the dataset into 8/10 portion for training, 1 set for validation and 1 set for testing
+def split_dataset_one_run(dataset):
+    size = len(dataset)
+    cut_train = int((10-2)/10 * size) # training cutoff
+    cut_val = int(1/10 * size) # validation cutoff
     # shuffle the dataset
     idx = np.arange(0,size)
     random.shuffle(idx)
@@ -26,14 +50,13 @@ def split_dataset(dataset,k):
     return train, val, test
 
 # Check images for top 4 PCs
-def PC4_plot(eigen_vectors):
+def PC4_plot(eigen_vectors, i, CrossValid):
     imgs = []
     for n in range(4):
         vh = eigen_vectors[n]
         vh_img = np.reshape(vh,(200,300))
         img = Image.fromarray(vh_img)
         imgs.append(img)
-    plt.figure()
     fig, ax = plt.subplots(2,2)
     fig.suptitle('Figure2: Images of top 4 principal components')
     ax[0, 0].imshow(imgs[0])
@@ -45,9 +68,12 @@ def PC4_plot(eigen_vectors):
     ax[1, 1].imshow(imgs[3])
     ax[1, 1].set_title('Principal Component 3')
     # plt.show()
-    plt.savefig('./figures/Q5b_top4PCs.png')
+    if CrossValid:
+        plt.savefig('./figures/Q5c_top4PCs_' + str(i) + '.png')
+    else:
+        plt.savefig('./figures/Q5b_top4PCs.png')
 
-# Generate y vectors (class=0/1) for train/val/test set
+# Generate y vectors (class=0/1 = Con/Min) for train/val/test set
 def generate_y(dataM,dataC):
     dataM_y = np.ones(len(dataM))
     dataC_y = np.zeros(len(dataC))
@@ -61,3 +87,31 @@ def apply_PCA(input_dataset,mean_image,top_eigen_vectors,top_sqrt_eigen_values):
     projected = np.matmul(msd, top_eigen_vectors)/top_sqrt_eigen_values
     PACed_x = np.insert(projected, 0, 1, axis=1)
     return PACed_x
+
+def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False, CrossValid = False, Epoch =  0, Interval = 0):
+    fig = plt.figure()
+    if CrossValid:  #k sets experiments
+        cost_bar = np.std(cost_list, axis = 0)
+        accu_bar = np.std(accuracy_list, axis = 0)
+        Bar_number = int((Epoch - 1) / Interval + 1)
+        I = np.linspace(0, Epoch - 1, Bar_number)
+        I = [int(i) for i in I] #round to integer
+        cost_list = np.mean(cost_list, axis = 0)
+        accuracy_list = np.mean(accuracy_list, axis = 0)
+        plt.errorbar(I, cost_list[I], yerr = cost_bar[I], fmt = '.b', capsize=5)
+        plt.errorbar(I, accuracy_list[I], yerr = accu_bar[I], fmt = '.r', capsize=5)
+    Costlabel = SetName + ' Error'
+    Accuracylabel = SetName + ' Error'
+    plt.plot(cost_list, 'b', label = Costlabel)
+    plt.plot(accuracy_list, 'r', label = Accuracylabel)
+    plt.xlabel('M epochs')
+    plt.ylabel('Cost')
+    plt.title('Loss and Accurcy in one run on ' + SetName)
+    # ax.grid(True)
+    plt.grid('color')
+    plt.legend(['Loss', 'Accuracy'])
+    if do_save_fig:
+        if CrossValid:
+            plt.savefig('./figures/Q5c_' + SetName + '_curves.png')
+        else:
+            plt.savefig('./figures/Q5b_' + SetName + '_curves.png')
