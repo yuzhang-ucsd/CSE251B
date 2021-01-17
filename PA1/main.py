@@ -22,6 +22,7 @@ def main():
         minivan = flatten_img(Minivan)
         convertible = flatten_img(Convertible)
         cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = CrossRun(k, minivan, convertible, lr, M)
+        print('The final test accuracy is %f' %(final_acc))
     else:
         # Load data from ./resized/ folder
         images, cnt = load_data(data_dir="./resized/")
@@ -30,6 +31,7 @@ def main():
         minivan = flatten_img(Minivan)
         convertible = flatten_img(Convertible)
         cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = OneRun(minivan, convertible, lr, M)
+        print('The final test accuracy is %f' %(final_acc))
 
     # Plot: Cost & Accuracy against Epochs
     plotFunc(cost_train, acc_train, SetName = 'TrainSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Epoch = M, Interval = Interval)
