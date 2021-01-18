@@ -12,6 +12,8 @@ def main():
     lr = 5 # learning rate
     M = 600 # Total Epoch
     Interval = 50 # Interval used for drawing the errorbars
+    Num_PC = 10
+
     if CrossValid:
         # k-fold dataset
         k = 10
@@ -21,16 +23,17 @@ def main():
         Convertible = images.get('Convertible')
         minivan = flatten_img(Minivan)
         convertible = flatten_img(Convertible)
-        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = CrossRun(k, minivan, convertible, lr, M)
+        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = CrossRun(k, minivan, convertible, lr, M, Num_PC)
         print('The final test accuracy is %f' %(final_acc))
     else:
+        # one Run
         # Load data from ./resized/ folder
         images, cnt = load_data(data_dir="./resized/")
         Minivan = images.get('Minivan')
         Convertible = images.get('Convertible')
         minivan = flatten_img(Minivan)
         convertible = flatten_img(Convertible)
-        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = OneRun(minivan, convertible, lr, M)
+        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = OneRun(minivan, convertible, lr, M, Num_PC)
         print('The final test accuracy is %f' %(final_acc))
 
     # Plot: Cost & Accuracy against Epochs
