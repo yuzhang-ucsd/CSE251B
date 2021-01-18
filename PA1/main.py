@@ -6,14 +6,14 @@ from TrainProcedure import *
 
 def main():
     do_show_fig = True
-    do_save_fig = False
+    do_save_fig = True
     CrossValid = True
     SoftmaxQ6 = True
 
     lr = 3 # learning rate
     M = 300 # Total Epoch
     Interval = 50 # Interval used for drawing the errorbars
-    Num_PC = 70
+    Num_PC = 70 #57%
 
     if not SoftmaxQ6: #Q5
         if CrossValid:
@@ -25,8 +25,8 @@ def main():
             Convertible = images.get('Convertible')
             minivan = flatten_img(Minivan)
             convertible = flatten_img(Convertible)
-            cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc = CrossRun(k, minivan, convertible, lr, M, Num_PC)
-            print('The final test accuracy is %f' %(final_acc))
+            cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc, std_final_acc = CrossRun(k, minivan, convertible, lr, M, Num_PC)
+            print('The final test accuracy is %f (std = %f)' %(final_acc, std_final_acc))
         else: #Q6
             # one Run
             # Load data from ./resized/ folder
@@ -50,16 +50,18 @@ def main():
         convertible = flatten_img(Convertible)
         pickup = flatten_img(Pickup)
         sedan = flatten_img(Sedan)
-        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc, Confusion_Matrix = Softmax(k, minivan, convertible, pickup, sedan, lr, M, Num_PC)
+        cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, final_acc, std_final_acc, Confusion_Matrix = Softmax(k, minivan, convertible, pickup, sedan, lr, M, Num_PC)
         print('The Confusion Matrix is\n')
         print(Confusion_Matrix)
-        print('The final test accuracy is %f' %(final_acc))
+        print('The final test accuracy is %f (std = %f)' %(final_acc, std_final_acc))
 
 
     # Plot: Cost & Accuracy against Epochs
-    plotFunc(cost_train, acc_train, SetName = 'TrainSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
-    plotFunc(cost_val, acc_val, SetName = 'ValidSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
     plotFunc(cost_test, acc_test, SetName = 'TestSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
+    plotFunc2(cost_train, cost_val, param='Error', do_save_fig=do_save_fig, CrossValid=CrossValid, Epoch = M, Softmax = SoftmaxQ6, Interval = Interval)
+    plotFunc2(acc_train, acc_val, param='Accuracy', do_save_fig=do_save_fig, CrossValid=CrossValid, Epoch = M, Softmax = SoftmaxQ6, Interval = Interval)
+    # plotFunc(cost_train, acc_train, SetName = 'TrainSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
+    # plotFunc(cost_val, acc_val, SetName = 'ValidSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
     if do_show_fig:
         plt.show()
 

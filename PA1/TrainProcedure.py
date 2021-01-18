@@ -30,7 +30,7 @@ def Softmax(k, minivan, convertible, pickup, sedan, lr, M, num_PC):
         final_acc[i] = final_acc_value
     for i in range(4):
         Confusion_Matrix[i,:] /= np.sum(Confusion_Matrix, axis = 1)[i]
-    return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc), Confusion_Matrix
+    return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc), np.std(final_acc), Confusion_Matrix
 
 def Softmax_kernel(i, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC, trainP, valP, testP, trainS, valS, testS):
     # combine the datasets
@@ -115,7 +115,7 @@ def CrossRun(k, minivan, convertible, lr, M, num_PC):
         cost_test[i,:] = np.array(cost_test_list)
         acc_test[i,:] = np.array(acc_test_list)
         final_acc[i] = final_acc_value
-    return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc)
+    return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc), np.std(final_acc)
 
 #Main training procejures for One_run
 def OneRun(minivan, convertible, lr, M, num_PC):

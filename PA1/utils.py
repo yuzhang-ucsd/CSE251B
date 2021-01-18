@@ -128,35 +128,17 @@ def apply_PCA(input_dataset,mean_image,top_eigen_vectors,top_sqrt_eigen_values):
     PACed_x = np.insert(projected, 0, 1, axis = 1)
     return PACed_x
 
+# plot the curve of Cost & Accuracy against epoch
 def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False, CrossValid = False, Softmax = False, Epoch =  0, Interval = 0):
     fig = plt.figure()
-    if not Softmax:
-        if CrossValid:  #k sets experiments
-            cost_bar = np.std(cost_list, axis = 0)
-            accu_bar = np.std(accuracy_list, axis = 0)
-            Bar_number = int((Epoch - 1) / Interval + 1)
-            I = np.linspace(0, Epoch - 1, Bar_number)
-            I = [int(i) for i in I] #round to integer
-            cost_list = np.mean(cost_list, axis = 0)
-            accuracy_list = np.mean(accuracy_list, axis = 0)
-            plt.errorbar(I, cost_list[I], yerr = cost_bar[I], fmt = '.b', capsize=5)
-            plt.errorbar(I, accuracy_list[I], yerr = accu_bar[I], fmt = '.r', capsize=5)
-        Costlabel = SetName + ' Error'
-        Accuracylabel = SetName + ' Error'
-        plt.plot(cost_list, 'b', label = Costlabel)
-        plt.plot(accuracy_list, 'r', label = Accuracylabel)
-        plt.xlabel('M epochs')
-        plt.ylabel('Cost')
-        plt.title('Loss and Accurcy in one run on ' + SetName)
-        # ax.grid(True)
-        plt.grid('color')
-        plt.legend(['Loss', 'Accuracy'])
-        if do_save_fig:
-            if CrossValid:
-                plt.savefig('./figures/Q5c_' + SetName + '_curves.png')
-            else:
-                plt.savefig('./figures/Q5b_' + SetName + '_curves.png')
+    if Softmax:
+        save_root = './figures/Q6a_' + SetName + '_curves.png'
     else:
+        if CrossValid:
+            save_root = './figures/Q5c_' + SetName + '_curves.png'
+        else:
+            save_root = './figures/Q5b_' + SetName + '_curves.png'
+    if CrossValid or Softmax:  #k sets experiments
         cost_bar = np.std(cost_list, axis = 0)
         accu_bar = np.std(accuracy_list, axis = 0)
         Bar_number = int((Epoch - 1) / Interval + 1)
@@ -166,15 +148,48 @@ def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False
         accuracy_list = np.mean(accuracy_list, axis = 0)
         plt.errorbar(I, cost_list[I], yerr = cost_bar[I], fmt = '.b', capsize=5)
         plt.errorbar(I, accuracy_list[I], yerr = accu_bar[I], fmt = '.r', capsize=5)
-        Costlabel = SetName + ' Error'
-        Accuracylabel = SetName + ' Error'
-        plt.plot(cost_list, 'b', label = Costlabel)
-        plt.plot(accuracy_list, 'r', label = Accuracylabel)
-        plt.xlabel('M epochs')
-        plt.ylabel('Cost')
-        plt.title('Loss and Accurcy in one run on ' + SetName)
-        # ax.grid(True)
-        plt.grid('color')
-        plt.legend(['Loss', 'Accuracy'])
-        if do_save_fig:
-            plt.savefig('./figures/Q6a_' + SetName + '_curves.png')
+    Costlabel = SetName + ' Error'
+    Accuracylabel = SetName + ' Error'
+    plt.plot(cost_list, 'b', label = Costlabel)
+    plt.plot(accuracy_list, 'r', label = Accuracylabel)
+    plt.xlabel('M epochs')
+    plt.ylabel('Cost')
+    plt.title('Loss and Accurcy in one run on ' + SetName)
+    # ax.grid(True)
+    plt.grid('color')
+    plt.legend(['Loss', 'Accuracy'])
+    if do_save_fig:
+        plt.savefig(save_root)
+
+# plot the curve of Cost on Training & Validation set against epoch
+def plotFunc2(train_list, val_list, param = 'Error', do_save_fig = False, CrossValid = False, Softmax = False, Epoch =  0, Interval = 0): # param = 'Error' or 'Accuracy'
+    fig = plt.figure()
+    if Softmax:
+        save_root = './figures/Q6a_' + param + '_curves.png'
+    else:
+        if CrossValid:
+            save_root = './figures/Q5c_' + param + '_curves.png'
+        else:
+            save_root = './figures/Q5b_' + param + '_curves.png'
+    if CrossValid or Softmax:  # k sets experiments
+        train_bar = np.std(train_list, axis=0)
+        val_bar = np.std(val_list, axis=0)
+        Bar_number = int((Epoch - 1) / Interval + 1)
+        I = np.linspace(0, Epoch - 1, Bar_number)
+        I = [int(i) for i in I]  # round to integer
+        train_list = np.mean(train_list, axis=0)
+        val_list = np.mean(val_list, axis=0)
+        plt.errorbar(I, train_list[I], yerr=train_bar[I], fmt='.b', capsize=5)
+        plt.errorbar(I, val_list[I], yerr=val_bar[I], fmt='.r', capsize=5)
+    TrainLabel = 'Training Set ' + param
+    ValLabel = 'Validation Set ' + param
+    plt.plot(train_list, 'b', label=TrainLabel)
+    plt.plot(val_list, 'r', label=ValLabel)
+    plt.xlabel('M epochs')
+    plt.ylabel('Cost')
+    plt.title('Training and Validation ' + param + ' across training epochs')
+    # ax.grid(True)
+    plt.grid('color')
+    plt.legend(['Training Set', 'Validation Set'])
+    if do_save_fig:
+        plt.savefig(save_root)

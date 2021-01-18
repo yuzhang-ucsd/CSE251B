@@ -76,9 +76,9 @@ def theta(X):
 def cost_function(X,y,theta):
     """
     Args:
-    	X: has shape Mxd' where M is the number of images and d' is the reduced dimension of each image after applying PCA
-    	y: has shape Mx1 where M is the number of images and for each image 1 is one class and 0 is the other
-    	theta: weight vector, has shape d'x1 and d' is the reduced dimension of each image after applying PCA
+    	X: has shape mx(d'+1) where m is the number of images selected and d' is the reduced dimension of each image after applying PCA and 1 is the bias
+    	y: has shape mx1 where M is the number of images and for each image 1 is one class and 0 is the other
+    	theta: weight vector, has shape (d'+1)x1
 
     Returns:
     	cost: corss-entropy loss of the given weights (theta)
@@ -94,9 +94,9 @@ def cost_function(X,y,theta):
 def stepwise_gradient(X,y,theta,lr):
     """
     Args:
-    	X: has shape Mxd' where M is the number of images and d' is the reduced dimension of each image after applying PCA
-    	y: has shape Mx1 where M is the number of images and for each image 1 is one class and 0 is the other
-    	theta: weight vector, has shape d'x1 and d' is the reduced dimension of each image after applying PCA
+    	X: has shape mx(d'+1) where m is the number of images selected and d' is the reduced dimension of each image after applying PCA and 1 is the bias
+    	y: has shape mx1 where M is the number of images and for each image 1 is one class and 0 is the other
+    	theta: weight vector, has shape (d'+1)x1
     	lr: learning rate
 
     Returns:
@@ -116,9 +116,9 @@ def stepwise_gradient(X,y,theta,lr):
 def predict_acc(X,y,theta):
     """
     Args:
-    	X: has shape Mxd' where M is the number of images and d' is the reduced dimension of each image after applying PCA
-    	y: has shape Mx1 where M is the number of images and for each image 1 is one class and 0 is the other
-    	theta: weight vector, has shape d'x1 and d' is the reduced dimension of each image after applying PCA
+    	X: has shape mx(d'+1) where m is the number of images selected and d' is the reduced dimension of each image after applying PCA and 1 is the bias
+    	y: has shape mx1 where M is the number of images and for each image 1 is one class and 0 is the other
+    	theta: weight vector, has shape (d'+1)x1
 
     Returns:
     	accuracy: percent correct when choosing the category according to the rule (=>0.5 if class1)
