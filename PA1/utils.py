@@ -154,7 +154,7 @@ def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False
     plt.plot(accuracy_list, 'r', label = Accuracylabel)
     plt.xlabel('M epochs')
     plt.ylabel('Cost')
-    plt.title('Loss and Accurcy in one run on ' + SetName)
+    plt.title('Loss and Accurcy of ' + SetName)
     # ax.grid(True)
     plt.grid('color')
     plt.legend(['Loss', 'Accuracy'])

@@ -13,7 +13,7 @@ def main():
     lr = 3 # learning rate
     M = 300 # Total Epoch
     Interval = 50 # Interval used for drawing the errorbars
-    Num_PC = 70 #57%
+    Num_PC = 50 #57%
 
     if not SoftmaxQ6: #Q5
         if CrossValid:
@@ -57,7 +57,7 @@ def main():
 
 
     # Plot: Cost & Accuracy against Epochs
-    plotFunc(cost_test, acc_test, SetName = 'TestSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
+    plotFunc(cost_test, acc_test, SetName = 'TestingSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
     plotFunc2(cost_train, cost_val, param='Error', do_save_fig=do_save_fig, CrossValid=CrossValid, Epoch = M, Softmax = SoftmaxQ6, Interval = Interval)
     plotFunc2(acc_train, acc_val, param='Accuracy', do_save_fig=do_save_fig, CrossValid=CrossValid, Epoch = M, Softmax = SoftmaxQ6, Interval = Interval)
     # plotFunc(cost_train, acc_train, SetName = 'TrainSet', do_save_fig = do_save_fig, CrossValid = CrossValid, Softmax = SoftmaxQ6, Epoch = M, Interval = Interval)
