@@ -4,7 +4,7 @@ import numpy as np
 from PCA import PCA
 
 #Main training procejures for CrossRun
-def CrossRun(k, minivan, convertible, lr, M):
+def CrossRun(k, minivan, convertible, lr, M, num_PC):
     # define learning rate and total number of epochs
     trainM, valM, testM = split_dataset_k_fold(minivan, k)
     trainC, valC, testC = split_dataset_k_fold(convertible, k)
@@ -18,7 +18,7 @@ def CrossRun(k, minivan, convertible, lr, M):
     for i in range(k):
         print('This is %dth iteration.' %(i))
         #the first parameter corresponds to the index of the output image
-        cost_train_list, acc_train_list, cost_val_list, acc_val_list, cost_test_list, acc_test_list, final_acc_value = OneRunKernel(i, lr, M, trainM[i], valM[i], testM[i], trainC[i], valC[i], testC[i], CrossValid = True)
+        cost_train_list, acc_train_list, cost_val_list, acc_val_list, cost_test_list, acc_test_list, final_acc_value = OneRunKernel(i, lr, M, num_PC, trainM[i], valM[i], testM[i], trainC[i], valC[i], testC[i], CrossValid = True)
         cost_train[i,:] = np.array(cost_train_list)
         acc_train[i,:] = np.array(acc_train_list)
         cost_val[i,:] = np.array(cost_val_list)
@@ -29,19 +29,17 @@ def CrossRun(k, minivan, convertible, lr, M):
     return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc)
 
 #Main training procejures for One_run
-def OneRun(minivan, convertible, lr, M):
+def OneRun(minivan, convertible, lr, M, num_PC):
     # define learning rate and total number of epochs
-    lr = 5
-    M = 600
     # select train/val/test from class1=Minivan(M)
     trainM, valM, testM = split_dataset_one_run(minivan)
     # select train/val/test from class2=Convertible(C)
     trainC, valC, testC = split_dataset_one_run(convertible)
 
-    return OneRunKernel(0, lr, M, trainM, valM, testM, trainC, valC, testC)  #the first parameter in this case is useless
+    return OneRunKernel(0, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC)  #the first parameter in this case is useless
 
 # Kernel function for training during each trail
-def OneRunKernel(i, lr, M, trainM, valM, testM, trainC, valC, testC, CrossValid = False):
+def OneRunKernel(i, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC, CrossValid = False):
     # combine the datasets
     train1 = np.concatenate((trainM, trainC),axis=0) # images
     val1 = np.concatenate((valM, valC),axis=0)
@@ -53,7 +51,6 @@ def OneRunKernel(i, lr, M, trainM, valM, testM, trainC, valC, testC, CrossValid 
 
     # Perform PCA on the flattened training set
     # Try using different numbers of components
-    num_PC = 10
     projected, mean_image, top_sqrt_eigen_values, top_eigen_vectors, eigen_vectors = PCA(train1,num_PC) # PCA performed only on the training set
     # Check images for top 4 PCs
     PC4_plot(eigen_vectors, i, CrossValid)
