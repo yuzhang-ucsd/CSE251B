@@ -50,6 +50,33 @@ def split_dataset_one_run(dataset):
     return train, val, test
 
 # Check images for top 4 PCs
+def Car_Image_plot(top_eigen_vectors, w, index):
+    imgs = []
+    for i in range(w.shape[1]):
+        vh = np.zeros([60000,])
+        for n in range(w.shape[0]):
+            vh += top_eigen_vectors[:,n] * w[n,i]
+        # rescale
+        pixel_max = np.max(vh)
+        pixel_min = np.min(vh)
+        vh = 255 * (vh - pixel_min) / (pixel_max - pixel_min)
+        vh_img = np.reshape(vh,(200,300))
+        img = Image.fromarray(vh_img)
+        imgs.append(img)
+    fig, ax = plt.subplots(2,2)
+    fig.suptitle('Figure2: Visualization of learnt weights for four car types')
+    ax[0, 0].imshow(imgs[0])
+    ax[0, 0].set_title('Convertible')
+    ax[0, 1].imshow(imgs[1])
+    ax[0, 1].set_title('Minivan')
+    ax[1, 0].imshow(imgs[2])
+    ax[1, 0].set_title('Pickup')
+    ax[1, 1].imshow(imgs[3])
+    ax[1, 1].set_title('Sedan')
+    # plt.show()
+    plt.savefig('./figures/Q6_w_visual_' + str(index) + '.png')
+
+# Check images for top 4 PCs
 def PC4_plot(eigen_vectors, i, CrossValid):
     imgs = []
     for n in range(4):
@@ -73,11 +100,24 @@ def PC4_plot(eigen_vectors, i, CrossValid):
     else:
         plt.savefig('./figures/Q5b_top4PCs.png')
 
+# Generate y vectors (class=0/1/2/3 = Con/Min/Pick/Sedan) for train/val/test set
+def generate_y_softmax(dataM, dataC, dataP, dataS):
+    dataC_y = np.zeros([4,len(dataC)])
+    dataC_y[:,:] = np.array([1,0,0,0]).reshape(4, 1)
+    dataM_y = np.zeros([4,len(dataM)])
+    dataM_y[:,:] = np.array([0,1,0,0]).reshape(4, 1)
+    dataP_y = np.zeros([4,len(dataP)])
+    dataP_y[:,:] = np.array([0,0,1,0]).reshape(4, 1)
+    dataS_y = np.zeros([4,len(dataS)])
+    dataS_y[:,:] = np.array([0,0,0,1]).reshape(4, 1)
+    data_y = np.concatenate((dataC_y, dataM_y, dataP_y, dataS_y), axis = 1)
+    return data_y.T
+
 # Generate y vectors (class=0/1 = Con/Min) for train/val/test set
 def generate_y(dataM,dataC):
     dataM_y = np.ones(len(dataM))
     dataC_y = np.zeros(len(dataC))
-    data_y = np.concatenate((dataM_y, dataC_y), axis=0)
+    data_y = np.concatenate((dataM_y, dataC_y), axis = 0)
     data_y = np.array([[i] for i in data_y])  # classes - input y to Logistic regression model
     return data_y
 
@@ -85,12 +125,38 @@ def generate_y(dataM,dataC):
 def apply_PCA(input_dataset,mean_image,top_eigen_vectors,top_sqrt_eigen_values):
     msd = input_dataset - mean_image # M x d
     projected = np.matmul(msd, top_eigen_vectors)/top_sqrt_eigen_values
-    PACed_x = np.insert(projected, 0, 1, axis=1)
+    PACed_x = np.insert(projected, 0, 1, axis = 1)
     return PACed_x
 
-def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False, CrossValid = False, Epoch =  0, Interval = 0):
+def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False, CrossValid = False, Softmax = False, Epoch =  0, Interval = 0):
     fig = plt.figure()
-    if CrossValid:  #k sets experiments
+    if not Softmax:
+        if CrossValid:  #k sets experiments
+            cost_bar = np.std(cost_list, axis = 0)
+            accu_bar = np.std(accuracy_list, axis = 0)
+            Bar_number = int((Epoch - 1) / Interval + 1)
+            I = np.linspace(0, Epoch - 1, Bar_number)
+            I = [int(i) for i in I] #round to integer
+            cost_list = np.mean(cost_list, axis = 0)
+            accuracy_list = np.mean(accuracy_list, axis = 0)
+            plt.errorbar(I, cost_list[I], yerr = cost_bar[I], fmt = '.b', capsize=5)
+            plt.errorbar(I, accuracy_list[I], yerr = accu_bar[I], fmt = '.r', capsize=5)
+        Costlabel = SetName + ' Error'
+        Accuracylabel = SetName + ' Error'
+        plt.plot(cost_list, 'b', label = Costlabel)
+        plt.plot(accuracy_list, 'r', label = Accuracylabel)
+        plt.xlabel('M epochs')
+        plt.ylabel('Cost')
+        plt.title('Loss and Accurcy in one run on ' + SetName)
+        # ax.grid(True)
+        plt.grid('color')
+        plt.legend(['Loss', 'Accuracy'])
+        if do_save_fig:
+            if CrossValid:
+                plt.savefig('./figures/Q5c_' + SetName + '_curves.png')
+            else:
+                plt.savefig('./figures/Q5b_' + SetName + '_curves.png')
+    else:
         cost_bar = np.std(cost_list, axis = 0)
         accu_bar = np.std(accuracy_list, axis = 0)
         Bar_number = int((Epoch - 1) / Interval + 1)
@@ -100,18 +166,15 @@ def plotFunc(cost_list, accuracy_list, SetName = 'TrainSet', do_save_fig = False
         accuracy_list = np.mean(accuracy_list, axis = 0)
         plt.errorbar(I, cost_list[I], yerr = cost_bar[I], fmt = '.b', capsize=5)
         plt.errorbar(I, accuracy_list[I], yerr = accu_bar[I], fmt = '.r', capsize=5)
-    Costlabel = SetName + ' Error'
-    Accuracylabel = SetName + ' Error'
-    plt.plot(cost_list, 'b', label = Costlabel)
-    plt.plot(accuracy_list, 'r', label = Accuracylabel)
-    plt.xlabel('M epochs')
-    plt.ylabel('Cost')
-    plt.title('Loss and Accurcy in one run on ' + SetName)
-    # ax.grid(True)
-    plt.grid('color')
-    plt.legend(['Loss', 'Accuracy'])
-    if do_save_fig:
-        if CrossValid:
-            plt.savefig('./figures/Q5c_' + SetName + '_curves.png')
-        else:
-            plt.savefig('./figures/Q5b_' + SetName + '_curves.png')
+        Costlabel = SetName + ' Error'
+        Accuracylabel = SetName + ' Error'
+        plt.plot(cost_list, 'b', label = Costlabel)
+        plt.plot(accuracy_list, 'r', label = Accuracylabel)
+        plt.xlabel('M epochs')
+        plt.ylabel('Cost')
+        plt.title('Loss and Accurcy in one run on ' + SetName)
+        # ax.grid(True)
+        plt.grid('color')
+        plt.legend(['Loss', 'Accuracy'])
+        if do_save_fig:
+            plt.savefig('./figures/Q6a_' + SetName + '_curves.png')
