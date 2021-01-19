@@ -100,6 +100,45 @@ def PC4_plot(eigen_vectors, i, CrossValid):
     else:
         plt.savefig('./figures/Q5b_top4PCs.png')
 
+# plot the training loss curves of 3 different learning rates (Q5ciii)
+def plotFunc3(cost_list1, cost_list2, cost_list3, lr1, lr2, lr3, SetName = 'TrainSet', do_save_fig = False, CrossValid = False, Softmax = False, Epoch =  0, Interval = 0):
+    fig = plt.figure()
+    if Softmax:
+        save_root = './figures/Q6a_' + SetName + '_curves_for_three_lr.png'
+    else:
+        if CrossValid:
+            save_root = './figures/Q5c_' + SetName + '_curves_for_three_lr.png'
+        else:
+            save_root = './figures/Q5b_' + SetName + '_curves_for_three_lr.png'
+    if CrossValid or Softmax:  #k sets experiments
+        cost_bar1 = np.std(cost_list1, axis = 0)
+        cost_bar2 = np.std(cost_list2, axis=0)
+        cost_bar3 = np.std(cost_list3, axis=0)
+        Bar_number = int((Epoch - 1) / Interval + 1)
+        I = np.linspace(0, Epoch - 1, Bar_number)
+        I = [int(i) for i in I] #round to integer
+        cost_list1 = np.mean(cost_list1, axis = 0)
+        cost_list2 = np.mean(cost_list2, axis=0)
+        cost_list3 = np.mean(cost_list3, axis=0)
+
+        plt.errorbar(I, cost_list1[I], yerr = cost_bar1[I], fmt = '.b', capsize=5)
+        plt.errorbar(I, cost_list2[I], yerr = cost_bar2[I], fmt = '.r', capsize=5)
+        plt.errorbar(I, cost_list3[I], yerr = cost_bar3[I], fmt = '.g', capsize=5)
+    Costlabel1 = SetName + ' Error1'
+    Costlabel2 = SetName + ' Error2'
+    Costlabel3 = SetName + ' Error3'
+    plt.plot(cost_list1, 'b', label = Costlabel1)
+    plt.plot(cost_list2, 'r', label = Costlabel2)
+    plt.plot(cost_list3, 'g', label = Costlabel3)
+    plt.xlabel('M epochs')
+    plt.ylabel('Cost')
+    plt.title('Loss for three different learning rates')
+    # ax.grid(True)
+    plt.grid('color')
+    plt.legend(['lr=' + str(lr1) , 'lr=' + str(lr2) , 'lr=' + str(lr3)])
+    if do_save_fig:
+        plt.savefig(save_root)
+
 # Generate y vectors (class=0/1/2/3 = Con/Min/Pick/Sedan) for train/val/test set
 def generate_y_softmax(dataM, dataC, dataP, dataS):
     dataC_y = np.zeros([4,len(dataC)])

@@ -4,7 +4,7 @@ import numpy as np
 from PCA import PCA
 
 #The training functions for softmax regression
-def Softmax(k, minivan, convertible, pickup, sedan, lr, M, num_PC):
+def Softmax(k, minivan, convertible, pickup, sedan, lr, M, num_PC, StochasticDescent = False):
     trainM, valM, testM = split_dataset_k_fold(minivan, k)
     trainC, valC, testC = split_dataset_k_fold(convertible, k)
     trainP, valP, testP = split_dataset_k_fold(pickup, k)
@@ -19,7 +19,7 @@ def Softmax(k, minivan, convertible, pickup, sedan, lr, M, num_PC):
     Confusion_Matrix = np.zeros([4,4])
     for i in range(k):
         print('This is %dth iteration.' %(i))
-        cost_train_list, acc_train_list, cost_val_list, acc_val_list, cost_test_list, acc_test_list, final_acc_value, confu_matrix = Softmax_kernel(i, lr, M, num_PC, trainM[i], valM[i], testM[i], trainC[i], valC[i], testC[i], trainP[i], valP[i], testP[i], trainS[i], valS[i], testS[i])
+        cost_train_list, acc_train_list, cost_val_list, acc_val_list, cost_test_list, acc_test_list, final_acc_value, confu_matrix = Softmax_kernel(i, lr, M, num_PC, trainM[i], valM[i], testM[i], trainC[i], valC[i], testC[i], trainP[i], valP[i], testP[i], trainS[i], valS[i], testS[i], StochasticDescent = StochasticDescent)
         Confusion_Matrix += confu_matrix
         cost_train[i,:] = np.array(cost_train_list)
         acc_train[i,:] = np.array(acc_train_list)
@@ -32,7 +32,7 @@ def Softmax(k, minivan, convertible, pickup, sedan, lr, M, num_PC):
         Confusion_Matrix[i,:] /= np.sum(Confusion_Matrix, axis = 1)[i]
     return cost_train, acc_train, cost_val, acc_val, cost_test, acc_test, np.mean(final_acc), np.std(final_acc), Confusion_Matrix
 
-def Softmax_kernel(i, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC, trainP, valP, testP, trainS, valS, testS):
+def Softmax_kernel(i, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC, trainP, valP, testP, trainS, valS, testS, StochasticDescent = False):
     # combine the datasets
     train1 = np.concatenate((trainM, trainC, trainP, trainS),axis = 0) # images
     val1 = np.concatenate((valM, valC, valP, valS),axis = 0)
@@ -64,7 +64,7 @@ def Softmax_kernel(i, lr, M, num_PC, trainM, valM, testM, trainC, valC, testC, t
     # loop M epochs
     for epoch in range(M):
         # tran the model with training set (train_x and train_y)
-        w = stepwise_gradient_softmax(train1_x, train1_y, w, lr)
+        w = stepwise_gradient_softmax(train1_x, train1_y, w, lr, StochasticDescent = StochasticDescent)
         w_list.append(w)
         # compute and record cost and accuracy
         # training set

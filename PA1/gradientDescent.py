@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 ## Softmax
 # define softmax function
@@ -33,21 +34,31 @@ def predict_acc_softmax(X,y,theta):
     return accuracy
 
 # define one round of gradient descent and weights update
-def stepwise_gradient_softmax(X,y,theta,lr):
+def stepwise_gradient_softmax(X , y, theta, lr, StochasticDescent = False):
     theta = np.asmatrix(theta)
     X = np.asmatrix(X)
     y = np.asmatrix(y)
     #update (batch version)
-    a_k = X * theta
-    y_k = softmax(a_k)
-    error = y_k - y
-    grad = X.T * error / X.shape[0]
-    grad = np.squeeze(np.asarray(grad))
-    theta_updated = theta - lr * grad # update weights using some learning rate times gradient
-    # theta_updated = np.squeeze(np.asarray(theta_updated))
+    if not StochasticDescent:  #batch gradient descent
+        a_k = X * theta
+        y_k = softmax(a_k)
+        error = y_k - y
+        grad = X.T * error / X.shape[0]
+        grad = np.squeeze(np.asarray(grad))
+        theta_updated = theta - lr * grad # update weights using some learning rate times gradient
+    else: #stochasic gradient descent
+        tmp_order = np.array(list(range(0,X.shape[0])))
+        random.shuffle(tmp_order)  #To randomize the input data
+        for i in range(X.shape[0]):
+            X_piece = X[tmp_order[i]]
+            a_k = X_piece * theta
+            y_k = softmax(a_k)
+            error = y_k - y[tmp_order[i]]
+            grad = X_piece.T * error# / X.shape[0]  Important: No average is needed
+            grad = np.squeeze(np.asarray(grad))
+            theta = theta - lr * grad
+        theta_updated = theta
     return theta_updated
-
-    # for i in range(theta.shape[2]):
 
 # Generate the Confusion Matrix on test set results
 def GeneConMatrix(X, y, theta):
