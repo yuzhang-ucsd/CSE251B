@@ -1,4 +1,5 @@
 matplotlib
 numpy
 PIL
+Please create an empyt directory called figures under current directory
 
